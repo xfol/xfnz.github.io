@@ -3,856 +3,219 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>专业打酱油</title>
+<title>简单导航页 · 三款 UI</title>
 <style>
   * { box-sizing: border-box; }
   html, body { min-height: 100%; }
   body {
     margin: 0;
-    min-height: 100vh;
-    padding: 48px 24px;
-    display: grid;
-    place-items: center;
-    overflow-x: hidden;
-    color: #f2f5ff;
-    background: #060917;
+    padding: 64px 40px 72px;
+    color: #eef1f8;
+    background: #08090d;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
       "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
   }
+  .glow {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(46% 36% at 14% 0%, rgba(99,102,241,.18), transparent 70%),
+      radial-gradient(38% 32% at 88% 4%, rgba(34,211,238,.12), transparent 70%),
+      radial-gradient(40% 30% at 50% 100%, rgba(192,86,33,.10), transparent 72%);
+  }
+  .wrap { position: relative; z-index: 1; max-width: 1320px; margin: 0 auto; }
 
-  /* ---------- 背景 ---------- */
-  .bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
-  .blob { position: absolute; border-radius: 50%; filter: blur(84px); will-change: transform; }
-  .b1 { width: 46vw; height: 46vw; top: -16vw; left: -8vw; background: #4f46e5; opacity: .55; animation: d1 24s ease-in-out infinite; }
-  .b2 { width: 40vw; height: 40vw; right: -10vw; bottom: -16vw; background: #0891b2; opacity: .42; animation: d2 28s ease-in-out infinite; }
-  .b3 { width: 30vw; height: 30vw; top: 30%; left: 46%; background: #db2777; opacity: .26; animation: d3 32s ease-in-out infinite; }
-  .b4 { width: 24vw; height: 24vw; left: 8%; bottom: 4%; background: #7c3aed; opacity: .30; animation: d2 26s ease-in-out infinite reverse; }
-  @keyframes d1 { 50% { transform: translate3d(7vw, 6vh, 0) scale(1.1); } }
-  @keyframes d2 { 50% { transform: translate3d(-6vw, -5vh, 0) scale(1.12); } }
-  @keyframes d3 { 50% { transform: translate3d(-8vw, 7vh, 0) scale(.9); } }
-  .grid {
-    position: absolute; inset: 0;
-    background-image:
-      linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
-    background-size: 68px 68px;
-    -webkit-mask-image: radial-gradient(circle at 50% 42%, #000 0%, transparent 74%);
-    mask-image: radial-gradient(circle at 50% 42%, #000 0%, transparent 74%);
-  }
-  .vignette { position: absolute; inset: 0; background: radial-gradient(130% 90% at 50% 0%, transparent 32%, rgba(3,5,14,.62) 100%); }
-
-  /* ---------- 内容 ---------- */
-  main {
-    position: relative;
-    z-index: 1;
-    width: min(580px, 100%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-  .brand {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 11px; letter-spacing: .34em; text-transform: uppercase;
-    color: rgba(226,233,255,.48);
-    margin-bottom: 34px;
-  }
-  .brand::before {
-    content: ""; width: 5px; height: 5px; border-radius: 50%;
-    background: #8ea6ff; box-shadow: 0 0 12px 2px rgba(142,166,255,.8);
-  }
-
-  .clock {
-    font-size: clamp(52px, 9vw, 78px);
-    font-weight: 200;
-    line-height: 1;
-    letter-spacing: .02em;
-    font-variant-numeric: tabular-nums;
-    background: linear-gradient(180deg, #ffffff 10%, #c3cffb 100%);
-    -webkit-background-clip: text; background-clip: text;
-    color: transparent;
-  }
-  .greeting {
-    display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
-    gap: 8px 10px;
-    margin: 14px 0 34px;
-    font-size: 15px;
-    letter-spacing: .04em;
-    color: rgba(226,233,255,.62);
-  }
-  .weather {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 4px 11px;
-    border-radius: 999px;
-    border: 1px solid rgba(255,255,255,.11);
-    background: rgba(255,255,255,.06);
-    font-size: 12px;
-    letter-spacing: .02em;
-    color: rgba(230,236,255,.72);
-    animation: rise .6s cubic-bezier(.22,.9,.28,1) both;
-  }
-  .weather[hidden] { display: none; }
-  .weather .w-ico { font-size: 13px; line-height: 1; }
-  .weather .w-temp { color: #fff; font-variant-numeric: tabular-nums; }
-  .weather .w-city { color: rgba(226,233,255,.45); }
-  #weather { cursor: pointer; }
-  #weather:hover { background: rgba(255,255,255,.115); border-color: rgba(255,255,255,.22); }
-  #weather .w-city { text-decoration: underline dotted rgba(226,233,255,.35); text-underline-offset: 3px; }
-
-  /* 城市选择面板 */
-  .city-modal {
-    position: fixed; inset: 0; z-index: 20;
-    display: grid; place-items: center;
-    padding: 24px;
-    background: rgba(4,6,14,.6);
-    -webkit-backdrop-filter: blur(6px);
-    backdrop-filter: blur(6px);
-  }
-  .city-modal[hidden] { display: none; }
-  .city-box {
-    width: min(440px, 100%);
-    max-height: min(80vh, 620px);
-    display: flex; flex-direction: column;
-    padding: 20px;
-    border-radius: 20px;
-    background: rgba(18,22,38,.94);
-    border: 1px solid rgba(255,255,255,.14);
-    box-shadow: 0 34px 90px -30px rgba(0,0,0,.95), inset 0 1px 0 rgba(255,255,255,.1);
-  }
-  .city-head {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 14px;
-    font-size: 13px; letter-spacing: .06em;
-    color: rgba(235,240,255,.82);
-  }
-  .city-close {
-    width: 28px; height: 28px;
-    border: 0; border-radius: 8px;
-    background: rgba(255,255,255,.07);
-    color: rgba(230,236,255,.7);
-    font: inherit; font-size: 16px; line-height: 1;
-    cursor: pointer;
-    transition: background .2s, color .2s;
-  }
-  .city-close:hover { background: rgba(255,255,255,.14); color: #fff; }
-  .city-auto {
-    display: flex; align-items: center; justify-content: space-between; gap: 12px;
-    margin-bottom: 12px; padding: 10px 12px;
-    border-radius: 11px;
-    border: 1px solid rgba(255,255,255,.09);
-    background: rgba(255,255,255,.04);
-    font-size: 12px; color: rgba(226,233,255,.66);
-  }
-  .city-auto button {
-    flex: none;
-    border: 0; background: transparent;
-    color: #a8bbff; font: inherit; font-size: 12px;
-    cursor: pointer;
-  }
-  .city-auto button:hover { color: #fff; }
-  .city-search { display: flex; gap: 8px; margin-bottom: 12px; }
-  .city-search input {
-    flex: 1; min-width: 0; height: 38px;
-    padding: 0 12px;
-    border-radius: 10px;
-    border: 1px solid rgba(255,255,255,.14);
-    background: rgba(255,255,255,.06);
-    color: #f2f5ff; font: inherit; font-size: 13px;
-    outline: 0;
-    transition: border-color .2s;
-  }
-  .city-search input:focus { border-color: rgba(158,182,255,.6); }
-  .city-search input::placeholder { color: rgba(220,229,255,.35); }
-  .city-search button {
-    flex: none; height: 38px; padding: 0 15px;
-    border: 0; border-radius: 10px;
-    background: rgba(255,255,255,.14);
-    color: #fff; font: inherit; font-size: 12.5px;
-    cursor: pointer;
-    transition: background .2s;
-  }
-  .city-search button:hover { background: rgba(255,255,255,.22); }
-  .city-list {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
-    overflow-y: auto;
-    padding-right: 2px;
-  }
-  .city-list button {
-    height: 36px;
-    border-radius: 9px;
-    border: 1px solid rgba(255,255,255,.08);
-    background: rgba(255,255,255,.04);
-    color: rgba(238,243,255,.8);
-    font: inherit; font-size: 12.5px;
-    cursor: pointer;
-    transition: background .2s, border-color .2s, color .2s;
-  }
-  .city-list button:hover { background: rgba(255,255,255,.12); color: #fff; }
-  .city-list button.on {
-    border-color: rgba(158,182,255,.65);
-    background: rgba(120,146,255,.16);
-    color: #fff;
-  }
-  .city-tip {
-    margin-top: 12px; min-height: 15px;
-    font-size: 11px; line-height: 1.5;
-    color: rgba(214,224,255,.4);
-  }
-  @media (max-width: 620px) {
-    .city-list { grid-template-columns: repeat(3, 1fr); }
-    .city-box { padding: 16px; }
-  }
-
-  /* 搜索框 */
-  .search {
-    position: relative;
-    display: flex; align-items: center;
-    width: 100%;
-    height: 62px;
-    padding: 0 12px 0 22px;
-    border-radius: 999px;
-    background: rgba(255,255,255,.085);
-    border: 1px solid rgba(255,255,255,.16);
-    -webkit-backdrop-filter: blur(18px) saturate(150%);
-    backdrop-filter: blur(18px) saturate(150%);
-    box-shadow: 0 20px 55px -22px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.13);
-    transition: border-color .3s, box-shadow .35s, background .3s;
-  }
-  .search:focus-within {
-    background: rgba(255,255,255,.13);
-    border-color: rgba(158,182,255,.6);
-    box-shadow:
-      0 0 0 4px rgba(120,146,255,.15),
-      0 24px 70px -24px rgba(74,95,255,.7),
-      inset 0 1px 0 rgba(255,255,255,.2);
-  }
-  .search svg { flex: none; width: 19px; height: 19px; color: rgba(214,224,255,.65); transition: color .3s; }
-  .search:focus-within svg { color: #cfdbff; }
-  .search input {
-    flex: 1; min-width: 0; height: 100%;
-    padding: 0 14px;
-    border: 0; outline: 0; background: transparent;
-    color: #f6f8ff; font: inherit; font-size: 16px; letter-spacing: .01em;
-  }
-  .search input::placeholder { color: rgba(220,229,255,.4); }
-  .search kbd {
-    flex: none;
-    padding: 5px 9px;
-    font-family: inherit; font-size: 10.5px; letter-spacing: .06em;
-    color: rgba(226,233,255,.5);
-    background: rgba(255,255,255,.07);
+  header { margin-bottom: 46px; }
+  .tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 5px 11px;
     border: 1px solid rgba(255,255,255,.12);
-    border-radius: 8px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.04);
+    font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase;
+    color: rgba(230,236,250,.55);
+  }
+  .tag::before {
+    content: ""; width: 5px; height: 5px; border-radius: 50%;
+    background: #818cf8; box-shadow: 0 0 10px 1px rgba(129,140,248,.8);
+  }
+  h1 {
+    margin: 18px 0 12px;
+    font-size: clamp(30px, 4vw, 44px);
+    font-weight: 200;
+    letter-spacing: -.01em;
+  }
+  h1 b { font-weight: 500; }
+  .sub {
+    margin: 0;
+    max-width: 62ch;
+    font-size: 13.5px;
+    line-height: 1.85;
+    color: rgba(224,231,246,.5);
+  }
+
+  /* 卡片 */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+  }
+  .card {
+    display: flex; flex-direction: column;
+    background: rgba(255,255,255,.035);
+    border: 1px solid rgba(255,255,255,.09);
+    border-radius: 20px;
+    overflow: hidden;
+    color: inherit; text-decoration: none;
+    transition: transform .3s cubic-bezier(.22,.9,.3,1), border-color .3s, box-shadow .3s, background .3s;
+  }
+  .card:hover {
+    transform: translateY(-5px);
+    background: rgba(255,255,255,.055);
+    border-color: rgba(255,255,255,.18);
+    box-shadow: 0 30px 60px -30px rgba(0,0,0,.95);
+  }
+
+  .preview {
+    position: relative;
+    aspect-ratio: 1440 / 900;
+    overflow: hidden;
+    background: #0c0e14;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .preview iframe {
+    position: absolute; top: 0; left: 0;
+    width: 1440px; height: 900px;
+    border: 0;
+    transform-origin: top left;
+    pointer-events: none;
+  }
+  .preview::after {
+    content: "打开预览 ↗";
+    position: absolute; inset: 0;
+    display: grid; place-items: center;
+    font-size: 12px; letter-spacing: .1em;
+    color: #fff;
+    background: rgba(8,9,13,.55);
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+    opacity: 0;
     transition: opacity .3s;
   }
-  .search:focus-within kbd { opacity: 0; }
+  .card:hover .preview::after { opacity: 1; }
 
-  /* 引擎切换 */
-  .engines {
-    display: inline-flex; gap: 2px;
-    margin-top: 18px; padding: 4px;
-    border-radius: 999px;
-    background: rgba(255,255,255,.045);
-    border: 1px solid rgba(255,255,255,.09);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
-  }
-  .engines button {
-    padding: 7px 15px;
-    border: 0; border-radius: 999px;
-    background: transparent; color: rgba(223,231,255,.55);
-    font: inherit; font-size: 12.5px; letter-spacing: .02em;
-    cursor: pointer;
-    transition: color .22s, background .22s, box-shadow .22s;
-  }
-  .engines button:hover { color: rgba(240,245,255,.85); }
-  .engines button.active {
-    color: #fff;
-    background: rgba(255,255,255,.14);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 6px 16px -8px rgba(0,0,0,.6);
-  }
-
-  /* 快捷方式 */
-  .shortcuts {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    width: 100%;
-    margin-top: 34px;
-  }
-  .shortcut {
-    display: flex; align-items: center; gap: 9px;
-    padding: 12px 13px;
-    border-radius: 15px;
-    background: rgba(255,255,255,.05);
-    border: 1px solid rgba(255,255,255,.085);
-    color: rgba(238,243,255,.86);
-    font-size: 13px; letter-spacing: .01em;
-    text-decoration: none;
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
-    transition: transform .24s, background .24s, border-color .24s, box-shadow .24s;
-  }
-  .shortcut:hover {
-    transform: translateY(-3px);
-    background: rgba(255,255,255,.11);
-    border-color: rgba(255,255,255,.19);
-    box-shadow: 0 14px 30px -16px rgba(0,0,0,.9);
-  }
-  .shortcut .ico {
+  .meta { display: flex; align-items: flex-start; gap: 14px; padding: 18px 20px 20px; }
+  .no {
+    flex: none;
     display: grid; place-items: center;
-    width: 26px; height: 26px; flex: none;
-    font-size: 15px; line-height: 1;
+    width: 30px; height: 30px;
     border-radius: 9px;
-    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(255,255,255,.1);
+    background: rgba(255,255,255,.04);
+    font-size: 11px; letter-spacing: .04em;
+    color: rgba(230,236,250,.6);
+    font-variant-numeric: tabular-nums;
   }
+  .meta h2 {
+    margin: 1px 0 6px;
+    font-size: 14.5px; font-weight: 500; letter-spacing: .01em;
+  }
+  .meta h2 small {
+    margin-left: 8px;
+    font-size: 10px; font-weight: 400;
+    letter-spacing: .16em; text-transform: uppercase;
+    color: rgba(224,231,246,.34);
+  }
+  .meta p { margin: 0; font-size: 12px; line-height: 1.7; color: rgba(224,231,246,.45); }
 
-  .hint { margin-top: 30px; font-size: 11.5px; letter-spacing: .05em; color: rgba(214,224,255,.34); }
-  .hint b { font-weight: 500; color: rgba(214,224,255,.55); }
+  footer {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 22px;
+    margin-top: 38px; padding-top: 22px;
+    border-top: 1px solid rgba(255,255,255,.07);
+    font-size: 11.5px; letter-spacing: .04em;
+    color: rgba(224,231,246,.34);
+  }
+  footer b { color: rgba(224,231,246,.62); font-weight: 500; }
 
-  /* 进场 */
-  .rise { animation: rise .8s cubic-bezier(.22,.9,.28,1) both; }
-  @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+  .in { animation: in .9s cubic-bezier(.22,.9,.3,1) both; }
+  @keyframes in { from { opacity: 0; transform: translateY(16px); } }
 
-  @media (max-width: 620px) {
-    body { padding: 36px 18px; }
-    .shortcuts { grid-template-columns: repeat(2, 1fr); }
-    .search { height: 56px; padding-left: 18px; }
-    .search kbd { display: none; }
-    .engines button { padding: 6px 12px; font-size: 12px; }
+  @media (max-width: 1000px) {
+    .cards { grid-template-columns: 1fr; max-width: 620px; }
+  }
+  @media (max-width: 560px) {
+    body { padding: 40px 20px 48px; }
+    .cards { gap: 18px; }
   }
 </style>
 </head>
 <body>
-  <div class="bg" aria-hidden="true">
-    <span class="blob b1"></span>
-    <span class="blob b2"></span>
-    <span class="blob b3"></span>
-    <span class="blob b4"></span>
-    <div class="grid"></div>
-    <div class="vignette"></div>
-  </div>
+  <div class="glow" aria-hidden="true"></div>
 
-  <main>
-    <div class="brand rise" style="animation-delay:.05s">Aurora Search</div>
-    <div class="clock rise" id="clock" style="animation-delay:.1s">--:--</div>
-    <p class="greeting rise" id="greeting" style="animation-delay:.16s">
-      <span id="greet-text">你好</span>
-      <!-- 天气：数据来自 open-meteo，加载失败时由脚本直接移除本节点 -->
-      <span class="weather" id="weather" hidden>
-        <span class="w-ico" id="w-ico">☀️</span>
-        <span class="w-temp" id="w-temp">--°</span>
-        <span class="w-city" id="w-city">北京</span>
-      </span>
-    </p>
+  <div class="wrap">
+    <header class="in">
+      <span class="tag">Simple Navigation · 3 Themes</span>
+      <h1>三款<b>搜索页</b>，挑一个喜欢的点。</h1>
+      <p class="sub">
+        每款都是单文件、零依赖，双击即可使用。支持百度 / Google / Bing / DuckDuckGo 切换、直接输入网址跳转、
+        快捷键 <b>/</b> 聚焦，引擎选择会自动记住。天气按 IP 自动识别，<b>点城市名可以手动改成襄阳等任意城市</b>。
+      </p>
+    </header>
 
-    <form class="search rise" id="form" style="animation-delay:.22s" autocomplete="off">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
-        <circle cx="11" cy="11" r="6.5"></circle>
-        <path d="M16 16l4.2 4.2"></path>
-      </svg>
-      <input id="q" type="text" placeholder="搜索，或直接输入网址" spellcheck="false" aria-label="搜索" />
-      <kbd>Enter</kbd>
-    </form>
+    <div class="cards">
+      <a class="card in" href="ui-1.html" target="_blank" rel="noopener" style="animation-delay:.08s">
+        <div class="preview"><iframe src="ui-1.html" title="极光预览" tabindex="-1"></iframe></div>
+        <div class="meta">
+          <span class="no">01</span>
+          <div>
+            <h2>极光<small>Aurora</small></h2>
+            <p>玻璃拟态 + 流动光晕，圆角胶囊搜索框，居中大时钟与问候语。</p>
+          </div>
+        </div>
+      </a>
 
-    <div class="engines rise" id="engines" style="animation-delay:.28s"></div>
+      <a class="card in" href="ui-2.html" target="_blank" rel="noopener" style="animation-delay:.16s">
+        <div class="preview"><iframe src="ui-2.html" title="暗黑预览" tabindex="-1"></iframe></div>
+        <div class="meta">
+          <span class="no">02</span>
+          <div>
+            <h2>轨道<small>Orbit</small></h2>
+            <p>深色科技感，网格与霓虹描边，等宽字体排版，像一块检索终端。</p>
+          </div>
+        </div>
+      </a>
 
-    <nav class="shortcuts rise" id="shortcuts" style="animation-delay:.34s" aria-label="快捷访问"></nav>
-
-    <div class="hint rise" style="animation-delay:.42s">按 <b>/</b> 聚焦搜索框 · <b>Esc</b> 清空</div>
-  </main>
-
-  <!-- 城市选择面板：点天气里的城市名打开 -->
-  <div class="city-modal" id="city-modal" hidden>
-    <div class="city-box" role="dialog" aria-modal="true" aria-label="选择城市">
-      <div class="city-head">
-        <span>选择城市</span>
-        <button class="city-close" id="city-close" type="button" aria-label="关闭">×</button>
-      </div>
-      <div class="city-auto">
-        <span id="city-now">当前：自动识别</span>
-        <button type="button" id="city-auto">恢复自动</button>
-      </div>
-      <form class="city-search" id="city-form">
-        <input id="city-input" type="text" placeholder="输入城市名，如 襄阳" aria-label="城市名" />
-        <button type="submit">确定</button>
-      </form>
-      <div class="city-list" id="city-list"></div>
-      <div class="city-tip" id="city-tip">点选城市后立即生效，选择会保存在本地</div>
+      <a class="card in" href="ui-3.html" target="_blank" rel="noopener" style="animation-delay:.24s">
+        <div class="preview"><iframe src="ui-3.html" title="素页预览" tabindex="-1"></iframe></div>
+        <div class="meta">
+          <span class="no">03</span>
+          <div>
+            <h2>素页<small>Paper</small></h2>
+            <p>米白纸感 + 衬线标题，暖色点缀，安静清爽，适合当浏览器主页。</p>
+          </div>
+        </div>
+      </a>
     </div>
+
+    <footer class="in" style="animation-delay:.32s">
+      <span><b>提示</b> 点击任意卡片在新标签页打开</span>
+      <span><b>编辑</b> 直接改 HTML 里的 SITES 数组即可换链接</span>
+      <span><b>部署</b> 复制单个文件到任意静态服务器</span>
+    </footer>
   </div>
 
 <script>
-  const ENGINES = [
-    { key: 'baidu',  name: '百度',       url: 'https://www.baidu.com/s?wd=' },
-    { key: 'google', name: 'Google',     url: 'https://www.google.com/search?q=' },
-    { key: 'bing',   name: 'Bing',       url: 'https://cn.bing.com/search?q=' },
-    { key: 'ddg',    name: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=' }
-  ];
-  const SITES = [
-    { name: 'GitHub',   icon: '🐙', url: 'https://github.com' },
-    { name: 'Bilibili', icon: '📺', url: 'https://www.bilibili.com' },
-    { name: '知乎',     icon: '💬', url: 'https://www.zhihu.com' },
-    { name: '微博',     icon: '🔥', url: 'https://weibo.com' },
-    { name: 'YouTube',  icon: '▶️', url: 'https://www.youtube.com' },
-    { name: '淘宝',     icon: '🛒', url: 'https://www.taobao.com' },
-    { name: '豆瓣',     icon: '🎬', url: 'https://www.douban.com' },
-    { name: '小红书',   icon: '📕', url: 'https://www.xiaohongshu.com' }
-  ];
-
-  const $ = (s) => document.querySelector(s);
-  const input = $('#q'), form = $('#form');
-  let engine = localStorage.getItem('nav.engine') || 'baidu';
-  if (!ENGINES.some(e => e.key === engine)) engine = 'baidu';
-
-  /* 时钟 + 问候 */
-  function tick() {
-    const now = new Date();
-    const hh = String(now.getHours()).padStart(2, '0');
-    const mm = String(now.getMinutes()).padStart(2, '0');
-    $('#clock').textContent = hh + ':' + mm;
-    const h = now.getHours();
-    const text =
-      h < 5  ? '夜深了，注意休息' :
-      h < 11 ? '早上好，今天想找点什么？' :
-      h < 13 ? '中午好，来点灵感' :
-      h < 18 ? '下午好，继续探索' :
-      h < 23 ? '晚上好，今天想搜点什么？' : '夜深了，早点休息';
-    $('#greet-text').textContent = text;
-  }
-  tick();
-  setInterval(tick, 1000);
-
-  /* 引擎 */
-  function renderEngines() {
-    const box = $('#engines');
-    box.innerHTML = '';
-    ENGINES.forEach((e) => {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.textContent = e.name;
-      if (e.key === engine) b.classList.add('active');
-      b.addEventListener('click', () => {
-        engine = e.key;
-        localStorage.setItem('nav.engine', engine);
-        renderEngines();
-      });
-      box.appendChild(b);
-    });
-  }
-  renderEngines();
-
-  /* 快捷链接 */
-  $('#shortcuts').innerHTML = SITES.map((s) => `
-    <a class="shortcut" href="${s.url}" target="_blank" rel="noopener">
-      <span class="ico">${s.icon}</span>
-      <span>${s.name}</span>
-    </a>`).join('');
-
-  /* 搜索 */
-  function isUrl(v) {
-    if (/\s/.test(v)) return false;
-    return /^https?:\/\//i.test(v) ||
-      /^([\w-]+\.)+[a-z]{2,}(:\d+)?(\/.*)?$/i.test(v);
-  }
-  form.addEventListener('submit', (ev) => {
-    ev.preventDefault();
-    const raw = input.value.trim();
-    if (!raw) return;
-    if (isUrl(raw)) {
-      location.href = /^https?:/i.test(raw) ? raw : 'https://' + raw;
-    } else {
-      const e = ENGINES.find(x => x.key === engine);
-      location.href = e.url + encodeURIComponent(raw);
-    }
-  });
-
-  /* 快捷键 */
-  document.addEventListener('keydown', (ev) => {
-    const typing = document.activeElement === input;
-    if (ev.key === '/' && !typing && !ev.metaKey && !ev.ctrlKey) {
-      ev.preventDefault();
-      input.focus();
-    }
-    if (ev.key === 'Escape') {
-      input.value = '';
-      if (typing) input.blur();
-    }
-  });
-
-  /* =========================================================================
-     天气模块（独立功能，整段删除也不影响搜索）
-     -------------------------------------------------------------------------
-     数据源  open-meteo.com（主）→ met.no（备），都免 key
-     城市    默认按 IP 自动识别，五个源依次兜底：
-             ipinfo.io → ipwho.is → ipwhois.app → ip.sb → freeipapi
-             全挂回退 WEATHER_CITY（北京），10 分钟内不重复请求
-             不想自动识别：把 WEATHER_AUTO_CITY 改成 false
-     缓存    天气 30 分钟、定位 12 小时，命中缓存不发请求
-     失败    超时 / 断网 / 接口报错 → 直接删除天气节点，页面无任何提示
-     关闭    把 WEATHER_ENABLED 改成 false；或删掉本段和页面里的 #weather
-     ========================================================================= */
-  const WEATHER_ENABLED   = true;           // ← 想彻底关掉天气：改成 false
-  const WEATHER_AUTO_CITY = true;           // ← 按 IP 自动识别城市；false 则固定用 WEATHER_CITY
-  const WEATHER_CITY      = '北京';         // ← 自动识别失败时的后备城市
-  const WEATHER_TTL       = 30 * 60 * 1000; // 天气缓存 30 分钟
-  const GEO_TTL           = 12 * 60 * 60 * 1000; // 定位结果缓存 12 小时
-
-  /* 英文城市名 → 中文（IP 定位返回英文，映射不到就显示原文） */
-  const CITY_ZH = {
-    'Beijing': '北京', 'Shanghai': '上海', 'Guangzhou': '广州', 'Shenzhen': '深圳',
-    'Wuhan': '武汉', 'Hangzhou': '杭州', 'Chengdu': '成都', 'Xi\'an': '西安',
-    'Nanjing': '南京', 'Chongqing': '重庆', 'Tianjin': '天津', 'Suzhou': '苏州',
-    'Changsha': '长沙', 'Zhengzhou': '郑州', 'Qingdao': '青岛', 'Xiamen': '厦门',
-    'Fuzhou': '福州', 'Jinan': '济南', 'Hefei': '合肥', 'Kunming': '昆明',
-    'Shenyang': '沈阳', 'Dalian': '大连', 'Harbin': '哈尔滨', 'Changchun': '长春',
-    'Shijiazhuang': '石家庄', 'Taiyuan': '太原', 'Nanchang': '南昌', 'Guiyang': '贵阳',
-    'Nanning': '南宁', 'Haikou': '海口', 'Lanzhou': '兰州', 'Urumqi': '乌鲁木齐',
-    'Hohhot': '呼和浩特', 'Yinchuan': '银川', 'Xining': '西宁', 'Lhasa': '拉萨',
-    'Hong Kong': '香港', 'Macau': '澳门', 'Taipei': '台北'
+  const RES = 1440;
+  const boxes = document.querySelectorAll('.preview');
+  const fit = (box) => {
+    const frame = box.querySelector('iframe');
+    if (frame) frame.style.transform = 'scale(' + (box.clientWidth / RES) + ')';
   };
-
-  /* 城市 → 经纬度，按需增删 */
-  const CITIES = {
-    '北京': [39.9042, 116.4074], '上海': [31.2304, 121.4737],
-    '广州': [23.1291, 113.2644], '深圳': [22.5431, 114.0579],
-    '武汉': [30.5928, 114.3055], '襄阳': [32.0422, 112.1448],
-    '宜昌': [30.6919, 111.2865], '荆州': [30.3350, 112.2397],
-    '十堰': [32.6292, 110.7980], '孝感': [30.9245, 113.9165],
-    '黄冈': [30.4461, 114.8724], '荆门': [31.0354, 112.1994],
-    '黄石': [30.1997, 115.0389], '咸宁': [29.8413, 114.3225],
-    '随州': [31.6902, 113.3826], '恩施': [30.2722, 109.4882],
-    '杭州': [30.2741, 120.1551], '成都': [30.5728, 104.0668],
-    '南京': [32.0603, 118.7969], '重庆': [29.5630, 106.5516],
-    '天津': [39.3434, 117.3616], '苏州': [31.2989, 120.5853],
-    '西安': [34.3416, 108.9398], '长沙': [28.2282, 112.9388],
-    '郑州': [34.7466, 113.6253], '青岛': [36.0671, 120.3826],
-    '厦门': [24.4798, 118.0894], '福州': [26.0745, 119.2965],
-    '昆明': [24.8801, 102.8329], '合肥': [31.8206, 117.2272],
-    '济南': [36.6512, 117.1201], '沈阳': [41.8057, 123.4315],
-    '大连': [38.9140, 121.6147], '哈尔滨': [45.8038, 126.5349],
-    '长春': [43.8171, 125.3235], '石家庄': [38.0428, 114.5149],
-    '太原': [37.8706, 112.5489], '南昌': [28.6820, 115.8579],
-    '贵阳': [26.6470, 106.6302], '南宁': [22.8170, 108.3665],
-    '海口': [20.0440, 110.1983], '兰州': [36.0611, 103.8343],
-    '乌鲁木齐': [43.8256, 87.6168], '呼和浩特': [40.8424, 111.7500],
-    '银川': [38.4872, 106.2309], '西宁': [36.6171, 101.7782],
-    '拉萨': [29.6520, 91.1721], '香港': [22.3193, 114.1694],
-    '澳门': [22.1987, 113.5439], '台北': [25.0330, 121.5654]
-  };
-
-  /* WMO 天气代码 → [图标, 文字]，文字只用于鼠标悬停提示 */
-  const WMO = {
-    0: ['☀️', '晴'],       1: ['🌤️', '晴间多云'],  2: ['⛅', '多云'],     3: ['☁️', '阴'],
-    45: ['🌫️', '雾'],      48: ['🌫️', '雾凇'],
-    51: ['🌦️', '毛毛雨'],  53: ['🌦️', '毛毛雨'],   55: ['🌦️', '毛毛雨'],
-    56: ['🌧️', '冻雨'],    57: ['🌧️', '冻雨'],
-    61: ['🌧️', '小雨'],    63: ['🌧️', '中雨'],     65: ['🌧️', '大雨'],
-    66: ['🌧️', '冻雨'],    67: ['🌧️', '冻雨'],
-    71: ['🌨️', '小雪'],    73: ['🌨️', '中雪'],     75: ['❄️', '大雪'],    77: ['🌨️', '米雪'],
-    80: ['🌦️', '阵雨'],    81: ['🌧️', '阵雨'],     82: ['⛈️', '强阵雨'],
-    85: ['🌨️', '阵雪'],    86: ['❄️', '阵雪'],
-    95: ['⛈️', '雷阵雨'],  96: ['⛈️', '雷阵雨'],   99: ['⛈️', '雷暴冰雹']
-  };
-
-  /* met.no 的天气符号 → WMO 代码（只做大致归类） */
-  function metnoCode(sym) {
-    const s = String(sym || '').toLowerCase();
-    if (s.includes('thunder')) return 95;
-    if (s.includes('heavyrain')) return 65;
-    if (s.includes('lightrain')) return 61;
-    if (s.includes('rain')) return 63;
-    if (s.includes('heavysnow')) return 75;
-    if (s.includes('lightsnow')) return 71;
-    if (s.includes('snow')) return 73;
-    if (s.includes('sleet')) return 66;
-    if (s.includes('fog')) return 45;
-    if (s.includes('partlycloudy')) return 2;
-    if (s.includes('cloudy')) return 3;
-    if (s.includes('fair')) return 1;
-    if (s.includes('clear')) return 0;
-    return 3;
-  }
-
-  /* 天气源：先用 open-meteo，失败再换 met.no（挪威气象局，全球覆盖） */
-  const WEATHER_SOURCES = [
-    {
-      name: 'open-meteo',
-      url: (lat, lon) => 'https://api.open-meteo.com/v1/forecast?latitude=' + lat +
-        '&longitude=' + lon + '&current=temperature_2m,weather_code&timezone=auto',
-      pick: (j) => (j.current && typeof j.current.temperature_2m === 'number')
-        ? { temp: Math.round(j.current.temperature_2m), code: j.current.weather_code } : null
-    },
-    {
-      name: 'met.no',
-      url: (lat, lon) => 'https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=' + lat + '&lon=' + lon,
-      pick: (j) => {
-        const ts = j.properties && j.properties.timeseries;
-        if (!ts || !ts.length) return null;
-        const temp = ts[0].data && ts[0].data.instant && ts[0].data.instant.details
-          && ts[0].data.instant.details.air_temperature;
-        if (typeof temp !== 'number') return null;
-        const hour = ts.find(x => x.data && x.data.next_1_hours);
-        const sym = hour && hour.data.next_1_hours.summary.symbol_code;
-        return { temp: Math.round(temp), code: metnoCode(sym) };
-      }
-    }
-  ];
-
-  /* 用不了就咔嚓掉：直接删节点，不留空白、不弹错误 */
-  function dropWeather() {
-    const box = document.getElementById('weather');
-    if (box) box.remove();
-  }
-
-  function paintWeather(d) {
-    const box = document.getElementById('weather');
-    if (!box) return;
-    const meta = WMO[d.code] || ['🌡️', '—'];
-    document.getElementById('w-ico').textContent = meta[0];
-    document.getElementById('w-temp').textContent = d.temp + '°';
-    document.getElementById('w-city').textContent = d.city;
-    box.title = d.city + ' · ' + meta[1] + '（点击切换城市）';
-    box.hidden = false;
-  }
-
-  /* 固定城市 → 坐标；城市不在表里就回退北京 */
-  function cityCoords(name) {
-    const c = CITIES[name] || CITIES['北京'];
-    return { city: CITIES[name] ? name : '北京', lat: c[0], lon: c[1] };
-  }
-
-  /* 英文城市名转中文，映射不到就原样返回 */
-  function zhCity(name) {
-    if (!name) return '';
-    const hit = Object.keys(CITY_ZH).find(k => k.toLowerCase() === String(name).toLowerCase());
-    return hit ? CITY_ZH[hit] : name;
-  }
-
-  /* 多个 IP 定位源，按顺序尝试，谁先成功用谁（都免 key、支持跨域） */
-  const GEO_SOURCES = [
-    {
-      url: 'https://ipinfo.io/json',
-      pick: (j) => {
-        if (!j.loc) return null;
-        const [lat, lon] = j.loc.split(',').map(Number);
-        return { city: j.city, lat, lon };
-      }
-    },
-    {
-      url: 'https://ipwho.is/',
-      pick: (j) => (j.success && j.latitude && j.longitude)
-        ? { city: j.city, lat: j.latitude, lon: j.longitude } : null
-    },
-    {
-      url: 'https://ipwhois.app/json/',
-      pick: (j) => (j.success !== false && j.latitude && j.longitude)
-        ? { city: j.city, lat: j.latitude, lon: j.longitude } : null
-    },
-    {
-      url: 'https://api.ip.sb/geoip',
-      pick: (j) => (j.latitude && j.longitude)
-        ? { city: j.city, lat: j.latitude, lon: j.longitude } : null
-    },
-    {
-      url: 'https://freeipapi.com/api/json',
-      pick: (j) => (j.latitude && j.longitude)
-        ? { city: j.cityName, lat: j.latitude, lon: j.longitude } : null
-    }
-  ];
-
-  /* 定位：默认按 IP 自动识别（结果缓存 12 小时），失败静默回退后备城市 */
-  async function locate() {
-    /* 0. 手动选过城市：直接用它，不再走 IP 定位 */
-    const manual = manualCity();
-    if (manual) return manual;
-
-    if (!WEATHER_AUTO_CITY) return cityCoords(WEATHER_CITY);
-
-    /* 1. 12 小时内定位过：直接用，不再请求 */
-    try {
-      const g = JSON.parse(localStorage.getItem('nav.geo') || 'null');
-      if (g && g.ts && Date.now() - g.ts < GEO_TTL && g.lat && g.lon) return g;
-    } catch (e) {}
-
-    /* 2. 刚失败过（10 分钟内）：不再重试，直接用后备城市 */
-    if (Date.now() - (+localStorage.getItem('nav.geo.failTs') || 0) < 10 * 60 * 1000) {
-      return cityCoords(WEATHER_CITY);
-    }
-
-    /* 3. 依次尝试多个定位源，总预算 5 秒，每个最多 2 秒 */
-    const deadline = Date.now() + 5000;
-    for (const s of GEO_SOURCES) {
-      const left = deadline - Date.now();
-      if (left <= 0) break;
-      const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), Math.min(2000, left));
-      try {
-        const res = await fetch(s.url, { signal: ctrl.signal, cache: 'no-store' });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const p = s.pick(await res.json());
-        if (!p || !isFinite(p.lat) || !isFinite(p.lon)) throw new Error('bad geo data');
-        const g = { ts: Date.now(), city: zhCity(p.city) || '当前位置', lat: p.lat, lon: p.lon };
-        localStorage.setItem('nav.geo', JSON.stringify(g));
-        localStorage.removeItem('nav.geo.failTs');
-        return g;
-      } catch (e) {
-        /* 这个源不行，换下一个 */
-      } finally {
-        clearTimeout(timer);
-      }
-    }
-
-    /* 4. 全部失败：记一笔，10 分钟内不再试，用后备城市 */
-    localStorage.setItem('nav.geo.failTs', Date.now());
-    return cityCoords(WEATHER_CITY);
-  }
-
-  function readWeatherCache(city) {
-    try {
-      const d = JSON.parse(localStorage.getItem('nav.weather') || 'null');
-      if (!d || d.city !== city || !d.ts) return null;
-      return Date.now() - d.ts > WEATHER_TTL ? null : d;
-    } catch (e) { return null; }
-  }
-
-  async function loadWeather() {
-    if (!WEATHER_ENABLED) { dropWeather(); return; }
-
-    /* 1. 确定位置：自动识别（缓存 12 小时）或固定城市 */
-    const place = await locate();
-
-    /* 2. 命中天气缓存：直接画，不发请求 */
-    const cached = readWeatherCache(place.city);
-    if (cached) { paintWeather(cached); return; }
-
-    /* 3. 依次尝试天气源，总预算 8 秒，每个最多 4 秒 */
-    const deadline = Date.now() + 8000;
-    for (const s of WEATHER_SOURCES) {
-      const left = deadline - Date.now();
-      if (left <= 0) break;
-      const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), Math.min(4000, left));
-      try {
-        const res = await fetch(s.url(place.lat, place.lon), { signal: ctrl.signal, cache: 'no-store' });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const p = s.pick(await res.json());
-        if (!p || !isFinite(p.temp) || p.code === undefined) throw new Error('bad weather data');
-        const data = { ts: Date.now(), city: place.city, temp: p.temp, code: p.code };
-        localStorage.setItem('nav.weather', JSON.stringify(data));
-        paintWeather(data);
-        return;
-      } catch (e) {
-        /* 这个源不行，换下一个 */
-      } finally {
-        clearTimeout(timer);
-      }
-    }
-
-    /* 4. 所有源都失败：咔嚓掉，不影响页面其他功能 */
-    dropWeather();
-  }
-
-  loadWeather();
-
-  /* =========================================================================
-     城市选择（手动覆盖 IP 定位）
-     -------------------------------------------------------------------------
-     点天气里的城市名打开面板，选一次就记住，下次打开直接用
-     「恢复自动」会删掉手动选择，重新按 IP 识别
-     ========================================================================= */
-  const cityModal = document.getElementById('city-modal');
-  const cityList = document.getElementById('city-list');
-  const cityInput = document.getElementById('city-input');
-  const cityTip = document.getElementById('city-tip');
-
-  function manualCity() {
-    try {
-      const c = JSON.parse(localStorage.getItem('nav.city') || 'null');
-      return (c && c.city && typeof c.lat === 'number' && typeof c.lon === 'number') ? c : null;
-    } catch (e) { return null; }
-  }
-
-  function openCity() {
-    const cur = manualCity();
-    document.getElementById('city-now').textContent = cur ? '当前：' + cur.city : '当前：自动识别';
-    cityList.innerHTML = Object.keys(CITIES).map((name) =>
-      '<button type="button" data-city="' + name + '"' +
-      (cur && cur.city === name ? ' class="on"' : '') + '>' + name + '</button>'
-    ).join('');
-    cityInput.value = '';
-    cityTip.textContent = '点选城市后立即生效，选择会保存在本地';
-    cityModal.hidden = false;
-    setTimeout(function () { cityInput.focus(); }, 40);
-  }
-
-  function closeCity() { cityModal.hidden = true; }
-
-  function applyCity(city, lat, lon) {
-    localStorage.setItem('nav.city', JSON.stringify({ city: city, lat: lat, lon: lon }));
-    localStorage.removeItem('nav.weather');
-    localStorage.removeItem('nav.geo.failTs');
-    closeCity();
-    if (!document.getElementById('weather')) { location.reload(); return; }
-    loadWeather();
-  }
-
-  cityList.addEventListener('click', function (ev) {
-    const btn = ev.target.closest('button[data-city]');
-    if (!btn) return;
-    const name = btn.getAttribute('data-city');
-    const pos = CITIES[name];
-    if (pos) applyCity(name, pos[0], pos[1]);
-  });
-
-  document.getElementById('city-close').addEventListener('click', closeCity);
-  cityModal.addEventListener('click', function (ev) {
-    if (ev.target === cityModal) closeCity();
-  });
-  document.addEventListener('keydown', function (ev) {
-    if (ev.key === 'Escape' && !cityModal.hidden) closeCity();
-  });
-
-  document.getElementById('city-auto').addEventListener('click', function () {
-    localStorage.removeItem('nav.city');
-    localStorage.removeItem('nav.weather');
-    localStorage.removeItem('nav.geo.failTs');
-    closeCity();
-    loadWeather();
-  });
-
-  /* 输入城市名：用 open-meteo 地理编码查坐标，能选表里没有的城市 */
-  document.getElementById('city-form').addEventListener('submit', async function (ev) {
-    ev.preventDefault();
-    const name = cityInput.value.trim();
-    if (!name) return;
-
-    /* 1. 本地城市表优先：坐标已核对，也不发请求 */
-    if (CITIES[name]) {
-      applyCity(name, CITIES[name][0], CITIES[name][1]);
-      return;
-    }
-
-    /* 2. 表里没有：查地理编码，限定国内，并优先同名、人口多的结果 */
-    cityTip.textContent = '正在查询…';
-    try {
-      const res = await fetch('https://geocoding-api.open-meteo.com/v1/search?count=10&language=zh&format=json&countryCode=CN&name=' + encodeURIComponent(name));
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const j = await res.json();
-      const list = (j.results || []).filter((x) => x.country_code === 'CN');
-      if (!list.length) throw new Error('not found');
-      const same = list.filter((x) => x.name === name);
-      const hit = (same.length ? same : list).sort((a, b) => (b.population || 0) - (a.population || 0))[0];
-      applyCity(hit.name || name, hit.latitude, hit.longitude);
-    } catch (e) {
-      cityTip.textContent = '没查到「' + name + '」，换个写法或直接从下面选';
-    }
-  });
-
-  /* 点天气胶囊打开面板 */
-  document.addEventListener('click', function (ev) {
-    if (ev.target.closest('#weather')) openCity();
+  boxes.forEach((box) => {
+    fit(box);
+    if ('ResizeObserver' in window) new ResizeObserver(() => fit(box)).observe(box);
+    else window.addEventListener('resize', () => fit(box));
   });
 </script>
 </body>
