@@ -419,7 +419,7 @@
 
 <script>
   const ENGINES = [
-    { key: 'baidu',  name: '百度',       url: 'https://www.baidu.com/s?wd=' },
+    { key: 'baidu',  name: '百度',       url: 'https://www.baidu.com/s?wd=', extra: '&tn=98138347_hao_pg' },
     { key: 'google', name: 'Google',     url: 'https://www.google.com/search?q=' },
     { key: 'bing',   name: 'Bing',       url: 'https://cn.bing.com/search?q=' },
     { key: 'ddg',    name: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=' }
@@ -498,7 +498,7 @@
       location.href = /^https?:/i.test(raw) ? raw : 'https://' + raw;
     } else {
       const e = ENGINES.find(x => x.key === engine);
-      location.href = e.url + encodeURIComponent(raw);
+      location.href = e.url + encodeURIComponent(raw) + (e.extra || '');
     }
   });
 
